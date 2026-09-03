@@ -13,7 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
   
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Configuración de Estilos y Colores Suaves -->
+  <!-- Configuración de Estilos -->
   <script>
     tailwind.config = {
       theme: {
@@ -24,11 +24,11 @@
           },
           colors: {
             brand: {
-              teal: '#4a9e96',        // Turquesa tenue institucional
-              darkteal: '#3b827c',    // Turquesa medio tenue
-              softbg: '#f3f7f7',      // Fondo tenue
-              navy: '#1a2e35',        // Azul institucional profundo
-              yellow: '#f3c73e',      // Amarillo institucional tenue
+              teal: '#4a9e96',
+              darkteal: '#3b827c',
+              softbg: '#f3f7f7',
+              navy: '#1a2e35',
+              yellow: '#f3c73e',
               yellowhover: '#e2b832'
             }
           }
@@ -51,7 +51,6 @@
   <!-- Header Institucional -->
   <header class="bg-brand-navy text-white p-4 shadow-sm flex justify-between items-center border-b-4 border-brand-teal">
     <div class="flex items-center gap-3.5">
-      <!-- Escudo vectorial incrustado -->
       <div class="bg-white p-1 rounded-lg shadow-xs flex items-center justify-center">
         <svg class="h-12 w-auto" viewBox="0 0 400 500" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M20 20 H380 V360 C380 430 200 480 200 480 C200 480 20 430 20 360 Z" fill="#3aa89e" stroke="#13282f" stroke-width="12"/>
@@ -102,9 +101,8 @@
         </div>
       </section>
 
-      <!-- Panel Multifiltros Ampliado -->
+      <!-- Panel Multifiltros -->
       <section class="bg-white p-4 rounded-xl shadow-xs border border-slate-200/80 space-y-3">
-        <!-- Buscador principal e Importador -->
         <div class="flex flex-col md:flex-row gap-3">
           <div class="relative flex-1">
             <input type="text" id="searchInput" oninput="render()" placeholder="Buscar por Apellido y Nombre del estudiante..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-brand-teal focus:border-brand-teal outline-none text-sm bg-slate-50 focus:bg-white transition">
@@ -126,14 +124,13 @@
             Importar Excel
           </button>
 
-          <button onclick="if(confirm('¿Estás seguro de que querés borrar todos los datos cargados?')){localStorage.clear(); location.reload();}" class="bg-rose-100 hover:bg-rose-200 text-rose-700 text-sm px-3 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1 border border-rose-200">
+          <button onclick="if(confirm('¿Estás seguro de que querés borrar todos los datos cargados?')){localStorage.clear(); data=[]; render();} location.reload();" class="bg-rose-100 hover:bg-rose-200 text-rose-700 text-sm px-3 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1 border border-rose-200">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
             Vaciar Datos
           </button>
           <input type="file" id="fileInput" class="hidden" accept=".xlsx, .xls, .csv" onchange="importExcel(event)">
         </div>
 
-        <!-- Fila de Desplegables de Filtro Independientes -->
         <div class="grid grid-cols-2 md:grid-cols-5 gap-2.5 pt-2 border-t border-slate-100">
           <div>
             <label class="block text-2xs uppercase font-bold text-slate-500 mb-1">Año Lectivo / Cal.</label>
@@ -177,7 +174,6 @@
 
       <!-- Lista de Alumnos Agrupados -->
       <section id="studentsContainer" class="space-y-4">
-        <!-- Generado dinámicamente -->
       </section>
     </div>
 
@@ -299,8 +295,8 @@
     const SHEET_ID = '1VFVseFOjlVfVPN2VUu5EOUQV4yQBVYWipgIYeWRWbic';
 
     function normalizeName(str) {
-      if (!str) return '';
-      return str
+      if (!str || typeof str !== 'string') return 'sin_nombre';
+      const clean = str
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
@@ -309,6 +305,39 @@
         .split(/\s+/)
         .sort()
         .join(" ");
+      return clean.length > 0 ? clean : str.toLowerCase().trim();
+    }
+
+    function parseCSVLine(line) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim().replace(/^"|"$/g, ''));
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.trim().replace(/^"|"$/g, ''));
+      return result;
+    }
+
+    function getVal(row, possibleKeys) {
+      const keys = Object.keys(row);
+      for (let key of keys) {
+        const cleanKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+        for (let target of possibleKeys) {
+          if (cleanKey.includes(target)) {
+            return row[key];
+          }
+        }
+      }
+      return '';
     }
 
     async function fetchFromGoogleSheets() {
@@ -320,43 +349,41 @@
         const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
         if (lines.length < 2) return;
         
-        const headers = lines[0].split(',').map(h => h.replace(/^"(.*)"$/, '$1').trim());
-        
+        const headers = parseCSVLine(lines[0]);
         const parsedData = [];
 
         for (let i = 1; i < lines.length; i++) {
-          const values = lines[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
+          const values = parseCSVLine(lines[i]);
           if (values.length === 0) continue;
 
           let row = {};
           headers.forEach((h, idx) => {
-            let val = values[idx] ? values[idx].replace(/^"(.*)"$/, '$1').trim() : '';
-            row[h] = val;
+            row[h] = values[idx] || '';
           });
 
-          const estudianteVal = row['Apellido y Nombre'] || row['estudiante'] || row['alumno'];
-          const espacioVal = row['Espacio'] || row['materia'] || row['asignatura'];
+          const alumnoVal = getVal(row, ['apellido', 'alumno', 'estudiante', 'nombre']) || row[headers[0]] || '';
+          const espacioVal = getVal(row, ['espacio', 'materia', 'asignatura']) || row[headers[1]] || 'Sin Espacio';
 
-          if (!estudianteVal || estudianteVal.toLowerCase().includes('apellido y nombre')) {
+          if (!alumnoVal || alumnoVal.toLowerCase().includes('apellido')) {
             continue;
           }
 
           parsedData.push({
             id: i,
-            alumno: estudianteVal,
-            espacio: espacioVal || 'Sin Espacio',
-            docente: row['Docente'] || 'Sin asignar',
-            ano: row['Cursada'] || '-',
-            curso: row['Curso'] || '-',
-            estado: row['Estado'] || 'PENDIENTE',
-            fecha: row['Fecha de acreditación'] || '-',
-            contenidos: row['Contenidos'] || '-',
-            obs: row['Observaciones'] || '-'
+            alumno: alumnoVal,
+            espacio: espacioVal,
+            docente: getVal(row, ['docente', 'profesor']) || 'Sin asignar',
+            ano: getVal(row, ['cursada', 'ano', 'anio']) || '-',
+            curso: getVal(row, ['curso', 'division']) || '-',
+            estado: getVal(row, ['estado']) || 'PENDIENTE',
+            fecha: getVal(row, ['fecha', 'acreditacion']) || '-',
+            contenidos: getVal(row, ['contenido', 'debe']) || '-',
+            obs: getVal(row, ['obs', 'observacion']) || '-'
           });
         }
 
         if (parsedData.length === 0) {
-          alert('No se pudieron procesar las filas.');
+          alert('No se pudieron encontrar registros válidos.');
           return;
         }
 
@@ -364,9 +391,9 @@
         localStorage.setItem('avance_continuo_db', JSON.stringify(data));
         updateDropdownOptions();
         render();
-        alert('¡Sincronización exitosa! Se cargaron ' + data.length + ' registros correctamente.');
+        alert('¡Sincronización exitosa! Se procesaron ' + data.length + ' registros individualmente.');
       } catch (error) {
-        alert('Error al conectar con Google Sheets. Verificá que la planilla esté compartida pública.');
+        alert('Error al conectar con Google Sheets.');
         console.error(error);
       }
     }
@@ -378,10 +405,10 @@
       const subjects = new Set();
 
       data.forEach(item => {
-        if (item.ano) years.add(String(item.ano).trim());
-        if (item.curso) courses.add(String(item.curso).trim());
-        if (item.docente) teachers.add(String(item.docente).trim());
-        if (item.espacio) subjects.add(String(item.espacio).trim());
+        if (item.ano && item.ano !== '-') years.add(String(item.ano).trim());
+        if (item.curso && item.curso !== '-') courses.add(String(item.curso).trim());
+        if (item.docente && item.docente !== 'Sin asignar') teachers.add(String(item.docente).trim());
+        if (item.espacio && item.espacio !== 'Sin Espacio') subjects.add(String(item.espacio).trim());
       });
 
       populateSelect('yearFilter', Array.from(years).sort(), 'Todos los años');
@@ -450,7 +477,7 @@
         const normKey = normalizeName(item.alumno);
         if (!grouped[normKey]) {
           grouped[normKey] = {
-            alumnoPrincipal: item.alumno,
+            alumnoPrincipal: item.alumno || 'Sin Nombre',
             variantes: new Set([item.alumno]),
             fichas: []
           };
@@ -505,7 +532,7 @@
                 <span class="text-brand-teal font-bold text-sm bg-brand-softbg p-1.5 rounded-lg border border-brand-teal/20">${isExpanded ? '▼' : '►'}</span>
                 <div>
                   <h3 class="font-bold text-brand-navy text-base">${group.alumnoPrincipal}</h3>
-                  <p class="text-xs text-slate-500">${fichasAMostrar.length} Espacio(s) Filtrado(s) ${group.variantes.size > 1 ? `<span class="text-brand-teal font-semibold">· Unificado</span>` : ''}</p>
+                  <p class="text-xs text-slate-500">${fichasAMostrar.length} Espacio(s) Filtrado(s)</p>
                 </div>
               </div>
               <div class="flex items-center gap-2 text-xs font-bold">
@@ -645,18 +672,19 @@
 
         data = rawData.map((row, idx) => ({
           id: idx + 1,
-          alumno: row['Apellido y Nombre'] || row['Estudiante'] || row['Alumno'] || 'Sin Nombre',
-          espacio: row['Espacio'] || row['Materia'] || row['Asignatura'] || 'Sin Espacio',
-          docente: row['Docente'] || row['Profesor'] || 'Sin asignar',
-          ano: row['Cursada'] || row['Año'] || '-',
-          curso: row['Curso'] || '-',
-          estado: row['Estado'] || 'PENDIENTE',
-          fecha: row['Fecha de acreditación'] || row['Fecha'] || '-',
-          contenidos: row['Contenidos'] || '-',
-          obs: row['Observaciones'] || '-'
+          alumno: getVal(row, ['apellido', 'alumno', 'estudiante', 'nombre']) || 'Sin Nombre',
+          espacio: getVal(row, ['espacio', 'materia', 'asignatura']) || 'Sin Espacio',
+          docente: getVal(row, ['docente', 'profesor']) || 'Sin asignar',
+          ano: getVal(row, ['cursada', 'ano', 'anio']) || '-',
+          curso: getVal(row, ['curso', 'division']) || '-',
+          estado: getVal(row, ['estado']) || 'PENDIENTE',
+          fecha: getVal(row, ['fecha', 'acreditacion']) || '-',
+          contenidos: getVal(row, ['contenido', 'debe']) || '-',
+          obs: getVal(row, ['obs', 'observacion']) || '-'
         }));
 
         localStorage.setItem('avance_continuo_db', JSON.stringify(data));
+        updateDropdownOptions();
         render();
         alert('Se importaron ' + data.length + ' registros desde Excel correctamente.');
       };
@@ -707,7 +735,6 @@
       }
     }
 
-    // Inicializar al cargar
     render();
   </script>
 </body>
