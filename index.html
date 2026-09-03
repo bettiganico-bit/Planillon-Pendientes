@@ -689,59 +689,67 @@ async function fetchFromGoogleSheets() {
     const response = await fetch(csvUrl);
     const csvText = await response.text();
     
-    // Normalizar saltos de línea
+    // Normalizar saltos de línea y separar filas
     const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
     if (lines.length < 2) return;
     
-    // Limpiar comillas del encabezado
-    const rawHeaders = lines[0].split(',').map(h => h.replace(/^"(.*)"$/, '$1').trim());
+    // Limpiar comillas y espacios de la fila de encabezados
+    const rawHeaders = lines[0].split(',').map(h => h.replace(/^"(.*)"$/, '$1').trim().toLowerCase());
     
     const parsedData = [];
 
     for (let i = 1; i < lines.length; i++) {
+      // Separar valores CSV respetando textos entre comillas
       const values = lines[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
       if (values.length === 0) continue;
 
-      let rawRow = {};
+      let rowDict = {};
       rawHeaders.forEach((h, idx) => {
         let val = values[idx] ? values[idx].replace(/^"(.*)"$/, '$1').trim() : '';
-        rawRow[h] = val;
+        rowDict[h] = val;
       });
 
-      // Búsqueda inteligente de columnas para evitar 'undefined'
-      function getVal(keys) {
-        for (let k of keys) {
-          const foundKey = Object.keys(rawRow).find(rk => rk.toLowerCase().includes(k.toLowerCase()));
-          if (foundKey && rawRow[foundKey]) return rawRow[foundKey];
-        }
-        return '';
+      // Función auxiliar para buscar el valor por variaciones de nombre de columna
+      function getColVal(keywords) {
+        const foundKey = Object.keys(rowDict).find(k => keywords.some(kw => k.includes(kw)));
+        return foundKey ? rowDict[foundKey] : '';
       }
 
-      const rowMapped = {
+      // Mapeo adaptado a las columnas de la planilla
+      const estudianteVal = getColVal(['apellido', 'estudiante', 'alumno', 'nombre']);
+      const espacioVal = getColVal(['espacio', 'materia', 'asignatura']);
+
+      // Evitar filas vacías o encabezados repetidos
+      if (!estudianteVal || estudianteVal.toLowerCase().includes('apellido') || estudianteVal.toLowerCase().includes('resultados')) {
+        continue;
+      }
+
+      parsedData.push({
         id: i,
-        estudiante: getVal(['estudiante', 'alumno', 'apellido', 'nombre']) || 'Sin Nombre',
-        espacio: getVal(['espacio', 'materia', 'asignatura', 'curricu']) || 'Espacio Sin Nombre',
-        docente: getVal(['docente', 'profesor']) || 'Sin asignar',
-        ano: getVal(['año', 'ano', 'lectivo', 'calendario', 'ciclo']) || '-',
-        curso: getVal(['curso', 'division', 'div']) || '-',
-        estado: getVal(['estado', 'condicion', 'situacion']) || 'PENDIENTE',
-        fecha: getVal(['fecha']) || '-',
-        contenidos: getVal(['contenido', 'tema', 'modulo']) || '-',
-        obs: getVal(['obs', 'observacion', 'nota']) || '-'
-      };
+        estudiante: estudianteVal || 'Sin Nombre',
+        espacio: espacioVal || 'Sin Espacio',
+        docente: getColVal(['docente', 'profesor']) || 'Sin asignar',
+        ano: getColVal(['año', 'ano', 'lectivo', 'calendario', 'ciclo']) || '-',
+        curso: getColVal(['curso', 'div', 'seccion']) || '-',
+        estado: getColVal(['estado', 'condicion', 'situacion']) || 'PENDIENTE',
+        fecha: getColVal(['fecha']) || '-',
+        contenidos: getColVal(['contenido', 'tema', 'modulo']) || '-',
+        obs: getColVal(['obs', 'nota', 'comentario']) || '-'
+      });
+    }
 
-      if (rowMapped.estudiante !== 'Sin Nombre' || rowMapped.espacio !== 'Espacio Sin Nombre') {
-        parsedData.push(rowMapped);
-      }
+    if (parsedData.length === 0) {
+      alert('No se pudieron procesar las filas. Verificá los encabezados de la planilla.');
+      return;
     }
 
     db = parsedData;
     localStorage.setItem('avance_continuo_db', JSON.stringify(db));
     updateDropdownOptions();
     render();
-    alert('¡Datos sincronizados y formateados correctamente desde Google Sheets!');
+    alert('¡Sincronización exitosa! Se cargaron ' + db.length + ' registros.');
   } catch (error) {
-    alert('Error al conectar con Google Sheets. Verificá que la planilla esté pública.');
+    alert('Error al conectar con Google Sheets. Verificá que la planilla esté compartida pública.');
     console.error(error);
   }
 }
