@@ -116,27 +116,25 @@
             Limpiar Filtros
           </button>
 
-        <button onclick="fetchFromGoogleSheets()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-3 py-2 rounded-lg transition flex items-center justify-center gap-1 shadow-sm">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-          Sincronizar Nube
-        </button>
+          <button onclick="fetchFromGoogleSheets()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-3 py-2 rounded-lg transition flex items-center justify-center gap-1 shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            Sincronizar Nube
+          </button>
 
-        <button onclick="document.getElementById('fileInput').click()" class="bg-brand-yellow hover:bg-brand-yellowhover text-brand-navy font-bold text-sm px-3 py-2 rounded-lg transition flex items-center justify-center gap-1 border border-amber-300">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-          Importar Excel
-        </button>
+          <button onclick="document.getElementById('fileInput').click()" class="bg-brand-yellow hover:bg-brand-yellowhover text-brand-navy font-bold text-sm px-3 py-2 rounded-lg transition flex items-center justify-center gap-1 border border-amber-300">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            Importar Excel
+          </button>
 
-        <button onclick="if(confirm('¿Estás seguro de que querés borrar todos los datos cargados?')){localStorage.clear(); location.reload();}" class="bg-rose-100 hover:bg-rose-200 text-rose-700 text-sm px-3 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1 border border-rose-200">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-          Vaciar Datos
-        </button>
+          <button onclick="if(confirm('¿Estás seguro de que querés borrar todos los datos cargados?')){localStorage.clear(); location.reload();}" class="bg-rose-100 hover:bg-rose-200 text-rose-700 text-sm px-3 py-2 rounded-lg font-bold transition flex items-center justify-center gap-1 border border-rose-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            Vaciar Datos
+          </button>
           <input type="file" id="fileInput" class="hidden" accept=".xlsx, .xls, .csv" onchange="importExcel(event)">
         </div>
 
         <!-- Fila de Desplegables de Filtro Independientes -->
         <div class="grid grid-cols-2 md:grid-cols-5 gap-2.5 pt-2 border-t border-slate-100">
-          
-          <!-- Filtro Año / Calendario (2020, 2021, etc) -->
           <div>
             <label class="block text-2xs uppercase font-bold text-slate-500 mb-1">Año Lectivo / Cal.</label>
             <select id="yearFilter" onchange="render()" class="w-full border rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 focus:bg-white outline-none focus:ring-2 focus:ring-brand-teal">
@@ -144,7 +142,6 @@
             </select>
           </div>
 
-          <!-- Filtro Curso (1ºA, 2ºB, etc) -->
           <div>
             <label class="block text-2xs uppercase font-bold text-slate-500 mb-1">Curso / Div.</label>
             <select id="courseFilter" onchange="render()" class="w-full border rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 focus:bg-white outline-none focus:ring-2 focus:ring-brand-teal">
@@ -152,7 +149,6 @@
             </select>
           </div>
 
-          <!-- Filtro Docente -->
           <div>
             <label class="block text-2xs uppercase font-bold text-slate-500 mb-1">Docente</label>
             <select id="teacherFilter" onchange="render()" class="w-full border rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 focus:bg-white outline-none focus:ring-2 focus:ring-brand-teal">
@@ -160,7 +156,6 @@
             </select>
           </div>
 
-          <!-- Filtro Materia / Espacio -->
           <div>
             <label class="block text-2xs uppercase font-bold text-slate-500 mb-1">Materia / Espacio</label>
             <select id="subjectFilter" onchange="render()" class="w-full border rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 focus:bg-white outline-none focus:ring-2 focus:ring-brand-teal">
@@ -168,7 +163,6 @@
             </select>
           </div>
 
-          <!-- Filtro Estado -->
           <div>
             <label class="block text-2xs uppercase font-bold text-slate-500 mb-1">Estado</label>
             <select id="statusFilter" onchange="render()" class="w-full border rounded-lg px-2.5 py-1.5 text-xs bg-slate-50 focus:bg-white outline-none focus:ring-2 focus:ring-brand-teal font-semibold">
@@ -178,7 +172,6 @@
               <option value="APROBADO">APROBADO</option>
             </select>
           </div>
-
         </div>
       </section>
 
@@ -195,7 +188,6 @@
         <p class="text-slate-600 text-sm mt-0.5">Resumen general del estado de acreditación de trayectorias institucionales.</p>
       </section>
 
-      <!-- Tarjetas de Métricas Rápidas -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs text-center">
           <span class="text-slate-500 text-xs uppercase font-bold">Total Fichas</span>
@@ -215,7 +207,6 @@
         </div>
       </div>
 
-      <!-- Tablas Estadísticas -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-2xs space-y-3">
           <h3 class="font-serif font-bold text-brand-navy text-base border-b pb-2">Materias con Mayor Cantidad de Pendientes</h3>
@@ -239,7 +230,7 @@
         <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
       </div>
       
-      <form id="editForm" class="space-y-3 text-sm">
+      <form id="editForm" onsubmit="saveModal(event)" class="space-y-3 text-sm">
         <div>
           <label class="block font-semibold text-slate-700">Apellido y Nombre</label>
           <input type="text" id="modalAlumno" class="w-full border rounded-lg p-2 mt-1 bg-slate-100 font-semibold text-slate-800" readonly>
@@ -278,7 +269,7 @@
           </div>
           <div>
             <label class="block font-semibold text-slate-700">Fecha de Acreditación</label>
-            <input type="date" id="modalFecha" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-brand-teal outline-none">
+            <input type="text" id="modalFecha" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-brand-teal outline-none">
           </div>
         </div>
 
@@ -305,6 +296,8 @@
     let expandedStudents = new Set();
     let currentEditId = null;
 
+    const SHEET_ID = '1VFVseFOjlVfVPN2VUu5EOUQV4yQBVYWipgIYeWRWbic';
+
     function normalizeName(str) {
       if (!str) return '';
       return str
@@ -316,6 +309,66 @@
         .split(/\s+/)
         .sort()
         .join(" ");
+    }
+
+    async function fetchFromGoogleSheets() {
+      try {
+        const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+        const response = await fetch(csvUrl);
+        const csvText = await response.text();
+        
+        const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
+        if (lines.length < 2) return;
+        
+        const headers = lines[0].split(',').map(h => h.replace(/^"(.*)"$/, '$1').trim());
+        
+        const parsedData = [];
+
+        for (let i = 1; i < lines.length; i++) {
+          const values = lines[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
+          if (values.length === 0) continue;
+
+          let row = {};
+          headers.forEach((h, idx) => {
+            let val = values[idx] ? values[idx].replace(/^"(.*)"$/, '$1').trim() : '';
+            row[h] = val;
+          });
+
+          const estudianteVal = row['Apellido y Nombre'] || row['estudiante'] || row['alumno'];
+          const espacioVal = row['Espacio'] || row['materia'] || row['asignatura'];
+
+          if (!estudianteVal || estudianteVal.toLowerCase().includes('apellido y nombre')) {
+            continue;
+          }
+
+          parsedData.push({
+            id: i,
+            alumno: estudianteVal,
+            espacio: espacioVal || 'Sin Espacio',
+            docente: row['Docente'] || 'Sin asignar',
+            ano: row['Cursada'] || '-',
+            curso: row['Curso'] || '-',
+            estado: row['Estado'] || 'PENDIENTE',
+            fecha: row['Fecha de acreditación'] || '-',
+            contenidos: row['Contenidos'] || '-',
+            obs: row['Observaciones'] || '-'
+          });
+        }
+
+        if (parsedData.length === 0) {
+          alert('No se pudieron procesar las filas.');
+          return;
+        }
+
+        data = parsedData;
+        localStorage.setItem('avance_continuo_db', JSON.stringify(data));
+        updateDropdownOptions();
+        render();
+        alert('¡Sincronización exitosa! Se cargaron ' + data.length + ' registros correctamente.');
+      } catch (error) {
+        alert('Error al conectar con Google Sheets. Verificá que la planilla esté compartida pública.');
+        console.error(error);
+      }
     }
 
     function updateDropdownOptions() {
@@ -410,10 +463,8 @@
         const group = grouped[key];
         const normSearch = normalizeName(searchText);
 
-        // Búsqueda por alumno
         const matchSearch = searchText === '' || key.includes(normSearch) || Array.from(group.variantes).some(v => v.toLowerCase().includes(searchText));
         
-        // Filtros específicos aplicados sobre las fichas del alumno
         const matchingFichas = group.fichas.filter(f => {
           const matchY = !selYear || String(f.ano || '').toLowerCase() === selYear;
           const matchC = !selCourse || String(f.curso || '').toLowerCase() === selCourse;
@@ -478,6 +529,7 @@
       });
 
       localStorage.setItem('avance_continuo_db', JSON.stringify(data));
+      updateDropdownOptions();
     }
 
     function renderFicha(f) {
@@ -589,170 +641,74 @@
         const buffer = e.target.result;
         const workbook = XLSX.read(buffer, { type: 'array' });
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+        const rawData = XLSX.utils.sheet_to_json(worksheet);
 
-        if (rows.length < 2) {
-          alert("El archivo Excel no contiene suficientes filas.");
-          return;
-        }
+        data = rawData.map((row, idx) => ({
+          id: idx + 1,
+          alumno: row['Apellido y Nombre'] || row['Estudiante'] || row['Alumno'] || 'Sin Nombre',
+          espacio: row['Espacio'] || row['Materia'] || row['Asignatura'] || 'Sin Espacio',
+          docente: row['Docente'] || row['Profesor'] || 'Sin asignar',
+          ano: row['Cursada'] || row['Año'] || '-',
+          curso: row['Curso'] || '-',
+          estado: row['Estado'] || 'PENDIENTE',
+          fecha: row['Fecha de acreditación'] || row['Fecha'] || '-',
+          contenidos: row['Contenidos'] || '-',
+          obs: row['Observaciones'] || '-'
+        }));
 
-        const headers = rows[0].map(h => String(h).toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
-
-        const getColIndex = (keywords, defaultIndex) => {
-          const found = headers.findIndex(h => keywords.some(k => h.includes(k)));
-          return found !== -1 ? found : defaultIndex;
-        };
-
-        const idxAlumno = getColIndex(["apellido", "nombre", "alumno", "estudiante"], 0);
-        const idxEspacio = getColIndex(["espacio", "materia", "asignatura"], 1);
-        const idxAno = getColIndex(["cursada", "ano", "año", "lectivo"], 2);
-        const idxCurso = getColIndex(["curso", "division", "seccion"], 3);
-        const idxContenidos = getColIndex(["contenido", "tema", "debe", "adeuda"], 4);
-        const idxEstado = getColIndex(["estado", "situacion", "condicion"], 5);
-        const idxFecha = getColIndex(["fecha", "acreditacion"], 6);
-        const idxDocente = getColIndex(["docente", "profesor", "prof"], 7);
-        const idxObs = getColIndex(["observacion", "nota"], 8);
-
-        const newData = [];
-
-        for (let i = 1; i < rows.length; i++) {
-          const row = rows[i];
-          if (!row || row.length === 0 || !row[idxAlumno]) continue;
-
-          newData.push({
-            id: Date.now() + i,
-            alumno: String(row[idxAlumno] || "Sin Nombre").trim(),
-            espacio: String(row[idxEspacio] || "").trim(),
-            ano: String(row[idxAno] || "").trim(),
-            curso: String(row[idxCurso] || "").trim(),
-            contenidos: String(row[idxContenidos] || "").trim(),
-            estado: String(row[idxEstado] || "PENDIENTE").trim().toUpperCase(),
-            fecha: String(row[idxFecha] || "").trim(),
-            docente: String(row[idxDocente] || "").trim(),
-            obs: String(row[idxObs] || "").trim()
-          });
-        }
-
-        data = newData;
-        expandedStudents.clear();
-        updateDropdownOptions();
+        localStorage.setItem('avance_continuo_db', JSON.stringify(data));
         render();
-        alert(`¡Se unificaron correctamente ${newData.length} fichas en el Planillón de Secundario!`);
+        alert('Se importaron ' + data.length + ' registros desde Excel correctamente.');
       };
-
       reader.readAsArrayBuffer(file);
     }
 
     function openModal(id) {
       currentEditId = id;
-      const f = data.find(d => d.id === id);
-      document.getElementById('modalAlumno').value = f.alumno;
-      document.getElementById('modalEspacio').value = f.espacio || '';
-      document.getElementById('modalDocente').value = f.docente || '';
-      document.getElementById('modalAno').value = f.ano || '';
-      document.getElementById('modalCurso').value = f.curso || '';
-      document.getElementById('modalEstado').value = (f.estado || 'PENDIENTE').toUpperCase();
-      document.getElementById('modalFecha').value = f.fecha || '';
-      document.getElementById('modalContenidos').value = f.contenidos || '';
-      document.getElementById('modalObs').value = f.obs || '';
+      const item = data.find(d => d.id === id);
+      if (!item) return;
+
+      document.getElementById('modalAlumno').value = item.alumno || '';
+      document.getElementById('modalEspacio').value = item.espacio || '';
+      document.getElementById('modalDocente').value = item.docente || '';
+      document.getElementById('modalAno').value = item.ano || '';
+      document.getElementById('modalCurso').value = item.curso || '';
+      document.getElementById('modalEstado').value = (item.estado || 'PENDIENTE').toUpperCase();
+      document.getElementById('modalFecha').value = item.fecha || '';
+      document.getElementById('modalContenidos').value = item.contenidos || '';
+      document.getElementById('modalObs').value = item.obs || '';
+
       document.getElementById('editModal').classList.remove('hidden');
     }
 
     function closeModal() {
       document.getElementById('editModal').classList.add('hidden');
+      currentEditId = null;
     }
 
-    document.getElementById('editForm').addEventListener('submit', (e) => {
+    function saveModal(e) {
       e.preventDefault();
-      const f = data.find(d => d.id === currentEditId);
-      f.espacio = document.getElementById('modalEspacio').value;
-      f.docente = document.getElementById('modalDocente').value;
-      f.ano = document.getElementById('modalAno').value;
-      f.curso = document.getElementById('modalCurso').value;
-      f.estado = document.getElementById('modalEstado').value;
-      f.fecha = document.getElementById('modalFecha').value;
-      f.contenidos = document.getElementById('modalContenidos').value;
-      f.obs = document.getElementById('modalObs').value;
-      closeModal();
-      updateDropdownOptions();
-      render();
-    });
+      if (!currentEditId) return;
 
-    // Inicialización
-    updateDropdownOptions();
-    render();
-const SHEET_ID = '1VFVseFOjlVfVPN2VUu5EOUQV4yQBVYWipgIYeWRWbic';
+      const item = data.find(d => d.id === currentEditId);
+      if (item) {
+        item.espacio = document.getElementById('modalEspacio').value;
+        item.docente = document.getElementById('modalDocente').value;
+        item.ano = document.getElementById('modalAno').value;
+        item.curso = document.getElementById('modalCurso').value;
+        item.estado = document.getElementById('modalEstado').value;
+        item.fecha = document.getElementById('modalFecha').value;
+        item.contenidos = document.getElementById('modalContenidos').value;
+        item.obs = document.getElementById('modalObs').value;
 
-async function fetchFromGoogleSheets() {
-  try {
-    const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
-    const response = await fetch(csvUrl);
-    const csvText = await response.text();
-    
-    const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
-    if (lines.length < 2) return;
-    
-    // Obtener y limpiar encabezados exactos
-    const headers = lines[0].split(',').map(h => h.replace(/^"(.*)"$/, '$1').trim());
-    
-    const parsedData = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
-      if (values.length === 0) continue;
-
-      let row = {};
-      headers.forEach((h, idx) => {
-        let val = values[idx] ? values[idx].replace(/^"(.*)"$/, '$1').trim() : '';
-        row[h] = val;
-      });
-
-      // Mapeo directo con las columnas reales de tu Google Sheet
-      const estudianteVal = row['Apellido y Nombre'] || row['estudiante'] || row['alumno'];
-      const espacioVal = row['Espacio'] || row['materia'] || row['asignatura'];
-
-      // Omitir filas vacías o repetidas
-      if (!estudianteVal || estudianteVal.toLowerCase().includes('apellido y nombre')) {
-        continue;
+        localStorage.setItem('avance_continuo_db', JSON.stringify(data));
+        render();
+        closeModal();
       }
-
-      parsedData.push({
-        id: i,
-        estudiante: estudianteVal,
-        espacio: espacioVal || 'Sin Espacio',
-        docente: row['Docente'] || 'Sin asignar',
-        ano: row['Cursada'] || '-',
-        curso: row['Curso'] || '-',
-        estado: row['Estado'] || 'PENDIENTE',
-        fecha: row['Fecha de acreditación'] || '-',
-        contenidos: row['Contenidos'] || '-',
-        obs: row['Observaciones'] || '-'
-      });
     }
 
-    if (parsedData.length === 0) {
-      alert('No se pudieron procesar las filas.');
-      return;
-    }
-
-    db = parsedData;
-    localStorage.setItem('avance_continuo_db', JSON.stringify(db));
-    updateDropdownOptions();
+    // Inicializar al cargar
     render();
-    alert('¡Sincronización exitosa! Se cargaron ' + db.length + ' registros correctamente.');
-  } catch (error) {
-    alert('Error al conectar con Google Sheets. Verificá que la planilla esté compartida pública.');
-    console.error(error);
-  }
-}
-  }
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  if (!db || db.length === 0) {
-    fetchFromGoogleSheets();
-  }
-});
   </script>
 </body>
 </html>
