@@ -681,7 +681,7 @@
     // Inicialización
     updateDropdownOptions();
     render();
- const SHEET_ID = '1VFVseFOjlVfVPN2VUu5EOUQV4yQBVYWipgIYeWRWbic';
+const SHEET_ID = '1VFVseFOjlVfVPN2VUu5EOUQV4yQBVYWipgIYeWRWbic';
 
 async function fetchFromGoogleSheets() {
   try {
@@ -689,57 +689,49 @@ async function fetchFromGoogleSheets() {
     const response = await fetch(csvUrl);
     const csvText = await response.text();
     
-    // Normalizar saltos de línea y separar filas
     const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
     if (lines.length < 2) return;
     
-    // Limpiar comillas y espacios de la fila de encabezados
-    const rawHeaders = lines[0].split(',').map(h => h.replace(/^"(.*)"$/, '$1').trim().toLowerCase());
+    // Obtener y limpiar encabezados exactos
+    const headers = lines[0].split(',').map(h => h.replace(/^"(.*)"$/, '$1').trim());
     
     const parsedData = [];
 
     for (let i = 1; i < lines.length; i++) {
-      // Separar valores CSV respetando textos entre comillas
       const values = lines[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
       if (values.length === 0) continue;
 
-      let rowDict = {};
-      rawHeaders.forEach((h, idx) => {
+      let row = {};
+      headers.forEach((h, idx) => {
         let val = values[idx] ? values[idx].replace(/^"(.*)"$/, '$1').trim() : '';
-        rowDict[h] = val;
+        row[h] = val;
       });
 
-      // Función auxiliar para buscar el valor por variaciones de nombre de columna
-      function getColVal(keywords) {
-        const foundKey = Object.keys(rowDict).find(k => keywords.some(kw => k.includes(kw)));
-        return foundKey ? rowDict[foundKey] : '';
-      }
+      // Mapeo directo con las columnas reales de tu Google Sheet
+      const estudianteVal = row['Apellido y Nombre'] || row['estudiante'] || row['alumno'];
+      const espacioVal = row['Espacio'] || row['materia'] || row['asignatura'];
 
-      // Mapeo adaptado a las columnas de la planilla
-      const estudianteVal = getColVal(['apellido', 'estudiante', 'alumno', 'nombre']);
-      const espacioVal = getColVal(['espacio', 'materia', 'asignatura']);
-
-      // Evitar filas vacías o encabezados repetidos
-      if (!estudianteVal || estudianteVal.toLowerCase().includes('apellido') || estudianteVal.toLowerCase().includes('resultados')) {
+      // Omitir filas vacías o repetidas
+      if (!estudianteVal || estudianteVal.toLowerCase().includes('apellido y nombre')) {
         continue;
       }
 
       parsedData.push({
         id: i,
-        estudiante: estudianteVal || 'Sin Nombre',
+        estudiante: estudianteVal,
         espacio: espacioVal || 'Sin Espacio',
-        docente: getColVal(['docente', 'profesor']) || 'Sin asignar',
-        ano: getColVal(['año', 'ano', 'lectivo', 'calendario', 'ciclo']) || '-',
-        curso: getColVal(['curso', 'div', 'seccion']) || '-',
-        estado: getColVal(['estado', 'condicion', 'situacion']) || 'PENDIENTE',
-        fecha: getColVal(['fecha']) || '-',
-        contenidos: getColVal(['contenido', 'tema', 'modulo']) || '-',
-        obs: getColVal(['obs', 'nota', 'comentario']) || '-'
+        docente: row['Docente'] || 'Sin asignar',
+        ano: row['Cursada'] || '-',
+        curso: row['Curso'] || '-',
+        estado: row['Estado'] || 'PENDIENTE',
+        fecha: row['Fecha de acreditación'] || '-',
+        contenidos: row['Contenidos'] || '-',
+        obs: row['Observaciones'] || '-'
       });
     }
 
     if (parsedData.length === 0) {
-      alert('No se pudieron procesar las filas. Verificá los encabezados de la planilla.');
+      alert('No se pudieron procesar las filas.');
       return;
     }
 
@@ -747,10 +739,12 @@ async function fetchFromGoogleSheets() {
     localStorage.setItem('avance_continuo_db', JSON.stringify(db));
     updateDropdownOptions();
     render();
-    alert('¡Sincronización exitosa! Se cargaron ' + db.length + ' registros.');
+    alert('¡Sincronización exitosa! Se cargaron ' + db.length + ' registros correctamente.');
   } catch (error) {
     alert('Error al conectar con Google Sheets. Verificá que la planilla esté compartida pública.');
     console.error(error);
+  }
+}
   }
 }
 
