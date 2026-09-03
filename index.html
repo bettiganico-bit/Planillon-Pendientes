@@ -327,15 +327,20 @@
       return result;
     }
 
-    function getVal(row, possibleKeys) {
+    // Búsqueda inteligente flexible por palabras clave o índice por defecto
+    function extractValue(row, values, keywords, fallbackIndex) {
       const keys = Object.keys(row);
       for (let key of keys) {
-        const cleanKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
-        for (let target of possibleKeys) {
-          if (cleanKey.includes(target)) {
-            return row[key];
+        const kClean = key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        for (let kw of keywords) {
+          if (kClean.includes(kw.toLowerCase())) {
+            const val = row[key];
+            if (val && val !== '') return val;
           }
         }
+      }
+      if (fallbackIndex !== undefined && values && values[fallbackIndex] !== undefined) {
+        return values[fallbackIndex];
       }
       return '';
     }
@@ -361,8 +366,8 @@
             row[h] = values[idx] || '';
           });
 
-          const alumnoVal = getVal(row, ['apellido', 'alumno', 'estudiante', 'nombre']) || row[headers[0]] || '';
-          const espacioVal = getVal(row, ['espacio', 'materia', 'asignatura']) || row[headers[1]] || 'Sin Espacio';
+          const alumnoVal = extractValue(row, values, ['apellido', 'alumno', 'estudiante', 'nombre'], 0);
+          const espacioVal = extractValue(row, values, ['espacio', 'materia', 'asignatura'], 1);
 
           if (!alumnoVal || alumnoVal.toLowerCase().includes('apellido')) {
             continue;
@@ -370,15 +375,15 @@
 
           parsedData.push({
             id: i,
-            alumno: alumnoVal,
-            espacio: espacioVal,
-            docente: getVal(row, ['docente', 'profesor']) || 'Sin asignar',
-            ano: getVal(row, ['cursada', 'ano', 'anio']) || '-',
-            curso: getVal(row, ['curso', 'division']) || '-',
-            estado: getVal(row, ['estado']) || 'PENDIENTE',
-            fecha: getVal(row, ['fecha', 'acreditacion']) || '-',
-            contenidos: getVal(row, ['contenido', 'debe']) || '-',
-            obs: getVal(row, ['obs', 'observacion']) || '-'
+            alumno: alumnoVal || 'Sin Nombre',
+            espacio: espacioVal || 'Sin Espacio',
+            docente: extractValue(row, values, ['docente', 'profesor', 'profe'], 2) || 'Sin asignar',
+            ano: extractValue(row, values, ['cursada', 'ano', 'anio', 'lectivo', 'cal'], 3) || '-',
+            curso: extractValue(row, values, ['curso', 'division', 'div', 'adeuda'], 4) || '-',
+            estado: (extractValue(row, values, ['estado', 'acreditacion', 'condicion'], 5) || 'PENDIENTE').toUpperCase(),
+            fecha: extractValue(row, values, ['fecha'], 6) || '-',
+            contenidos: extractValue(row, values, ['contenido', 'debe', 'temas', 'programa'], 7) || '-',
+            obs: extractValue(row, values, ['obs', 'observacion', 'nota', 'comentario'], 8) || '-'
           });
         }
 
@@ -391,7 +396,7 @@
         localStorage.setItem('avance_continuo_db', JSON.stringify(data));
         updateDropdownOptions();
         render();
-        alert('¡Sincronización exitosa! Se procesaron ' + data.length + ' registros individualmente.');
+        alert('¡Sincronización exitosa! Se cargaron ' + data.length + ' fichas completas.');
       } catch (error) {
         alert('Error al conectar con Google Sheets.');
         console.error(error);
@@ -672,15 +677,15 @@
 
         data = rawData.map((row, idx) => ({
           id: idx + 1,
-          alumno: getVal(row, ['apellido', 'alumno', 'estudiante', 'nombre']) || 'Sin Nombre',
-          espacio: getVal(row, ['espacio', 'materia', 'asignatura']) || 'Sin Espacio',
-          docente: getVal(row, ['docente', 'profesor']) || 'Sin asignar',
-          ano: getVal(row, ['cursada', 'ano', 'anio']) || '-',
-          curso: getVal(row, ['curso', 'division']) || '-',
-          estado: getVal(row, ['estado']) || 'PENDIENTE',
-          fecha: getVal(row, ['fecha', 'acreditacion']) || '-',
-          contenidos: getVal(row, ['contenido', 'debe']) || '-',
-          obs: getVal(row, ['obs', 'observacion']) || '-'
+          alumno: extractValue(row, null, ['apellido', 'alumno', 'estudiante', 'nombre']) || 'Sin Nombre',
+          espacio: extractValue(row, null, ['espacio', 'materia', 'asignatura']) || 'Sin Espacio',
+          docente: extractValue(row, null, ['docente', 'profesor', 'profe']) || 'Sin asignar',
+          ano: extractValue(row, null, ['cursada', 'ano', 'anio', 'lectivo', 'cal']) || '-',
+          curso: extractValue(row, null, ['curso', 'division', 'div', 'adeuda']) || '-',
+          estado: (extractValue(row, null, ['estado', 'acreditacion', 'condicion']) || 'PENDIENTE').toUpperCase(),
+          fecha: extractValue(row, null, ['fecha']) || '-',
+          contenidos: extractValue(row, null, ['contenido', 'debe', 'temas', 'programa']) || '-',
+          obs: extractValue(row, null, ['obs', 'observacion', 'nota', 'comentario']) || '-'
         }));
 
         localStorage.setItem('avance_continuo_db', JSON.stringify(data));
