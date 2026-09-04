@@ -271,7 +271,7 @@
 
         <div>
           <label class="block font-semibold text-slate-700">Contenidos (lo que debe)</label>
-          <textarea id="modalContenidos" rows="2" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-brand-teal outline-none"></textarea>
+          <textarea id="modalContenidos" rows="3" class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-brand-teal outline-none"></textarea>
         </div>
 
         <div>
@@ -351,11 +351,14 @@
         let idxDocente = headers.findIndex(h => h.includes('docente') || h.includes('profesor'));
         let idxObs = headers.findIndex(h => h.includes('obs') || h.includes('observacion'));
 
-        // INTERCAMBIO CLAVE: Se mapea explícitamente "Contenidos" en el índice 4 y "Fecha" en el índice 6
-        let idxContenidos = 4;
-        let idxFecha = 6;
+        // DETECCIÓN DINÁMICA DE CAMPOS
+        let idxContenidos = headers.findIndex(h => h.includes('contenido') || h.includes('debe'));
+        let idxFecha = headers.findIndex(h => h.includes('fecha') || h.includes('acreditacion'));
 
-        // Fallbacks para el resto si la búsqueda dinámica por palabra no encuentra encabezado
+        // FORZAR POSICIÓN SI NO ENCUENTRA ENCABEZADOS COINCIDENTES
+        if (idxContenidos === -1) idxContenidos = 4;
+        if (idxFecha === -1) idxFecha = 6;
+
         if (idxAlumno === -1) idxAlumno = 0;
         if (idxEspacio === -1) idxEspacio = 1;
         if (idxAno === -1) idxAno = 2;
@@ -380,15 +383,26 @@
             estVal = 'PENDIENTE';
           }
 
+          // Se asegura de que el texto largo de temas vaya a contenidos y fecha quede limpio
+          let rawContenidos = values[idxContenidos] || '-';
+          let rawFecha = values[idxFecha] || '-';
+
+          // Si por la estructura de la planilla la fecha contiene el texto largo, se intercambian
+          if (rawFecha.length > 15 && rawContenidos.length < 15) {
+            let temp = rawFecha;
+            rawFecha = rawContenidos;
+            rawContenidos = temp;
+          }
+
           parsedData.push({
             id: i,
             alumno: alumnoVal || 'Sin Nombre',
             espacio: values[idxEspacio] || 'Sin Espacio',
             ano: values[idxAno] || '-',
             curso: values[idxCurso] || '-',
-            fecha: values[idxFecha] || '-',
+            fecha: rawFecha,
             estado: estVal,
-            contenidos: values[idxContenidos] || '-',
+            contenidos: rawContenidos,
             docente: values[idxDocente] || 'Sin asignar',
             obs: values[idxObs] || '-'
           });
@@ -403,7 +417,7 @@
         localStorage.setItem('avance_continuo_db', JSON.stringify(data));
         updateDropdownOptions();
         render();
-        alert('¡Sincronización exitosa! Los datos de Contenidos y Fecha de Acreditación han sido corregidos.');
+        alert('¡Sincronización realizada correctamente! Los contenidos del programa aparecen ahora en el campo Contenidos.');
       } catch (error) {
         alert('Error al conectar con Google Sheets.');
         console.error(error);
@@ -592,18 +606,18 @@
           <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs bg-slate-50 p-2.5 rounded-lg border border-slate-100">
             <div><strong class="text-slate-500 block">Año Lectivo / Cal.:</strong> <span class="font-semibold text-slate-800">${f.ano || '-'}</span></div>
             <div><strong class="text-slate-500 block">Curso (que adeuda):</strong> <span class="font-semibold text-slate-800">${f.curso || '-'}</span></div>
-            <div><strong class="text-slate-500 block">Fecha Acreditación:</strong> <span class="font-semibold text-slate-800">${f.fecha || 'Pendiente'}</span></div>
+            <div><strong class="text-slate-500 block">Fecha Acreditación:</strong> <span class="font-semibold text-slate-800">${f.fecha || '-'}</span></div>
             <div><strong class="text-slate-500 block">Estado:</strong> <span class="font-semibold text-slate-800">${est}</span></div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
             <div>
               <strong class="text-brand-navy font-semibold block">Contenidos (lo que debe):</strong>
-              <p class="text-slate-600 mt-0.5">${f.contenidos || 'Sin detalles'}</p>
+              <p class="text-slate-600 mt-0.5 whitespace-pre-line">${f.contenidos || 'Sin detalles'}</p>
             </div>
             <div>
               <strong class="text-brand-navy font-semibold block">Observaciones:</strong>
-              <p class="text-slate-600 mt-0.5">${f.obs || 'Sin observaciones'}</p>
+              <p class="text-slate-600 mt-0.5 whitespace-pre-line">${f.obs || 'Sin observaciones'}</p>
             </div>
           </div>
         </div>
@@ -690,15 +704,24 @@
             estVal = 'PENDIENTE';
           }
 
+          let rawContenidos = row[4] || '-';
+          let rawFecha = row[6] || '-';
+
+          if (String(rawFecha).length > 15 && String(rawContenidos).length < 15) {
+            let temp = rawFecha;
+            rawFecha = rawContenidos;
+            rawContenidos = temp;
+          }
+
           return {
             id: idx + 1,
             alumno: row[0] || 'Sin Nombre',
             espacio: row[1] || 'Sin Espacio',
             ano: row[2] || '-',
             curso: row[3] || '-',
-            fecha: row[6] || '-',
+            fecha: rawFecha,
             estado: estVal,
-            contenidos: row[4] || '-',
+            contenidos: rawContenidos,
             docente: row[7] || 'Sin asignar',
             obs: row[8] || '-'
           };
