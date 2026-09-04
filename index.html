@@ -343,25 +343,24 @@
         const headersRaw = parseCSVLine(lines[0]);
         const headers = headersRaw.map(cleanHeader);
 
-        // Mapeo dinámico mejorado por detección semántica previa
         let idxAlumno = headers.findIndex(h => h.includes('alumno') || h.includes('estudiante') || h.includes('apellido'));
         let idxEspacio = headers.findIndex(h => h.includes('espacio') || h.includes('materia') || h.includes('asignatura'));
         let idxAno = headers.findIndex(h => h.includes('ano') || h.includes('anio') || h.includes('lectivo') || h.includes('cursada'));
         let idxCurso = headers.findIndex(h => h.includes('curso') || h.includes('division') || h.includes('adeuda'));
-        let idxFecha = headers.findIndex(h => h.includes('fecha'));
         let idxEstado = headers.findIndex(h => h.includes('estado') || h.includes('condicion'));
-        let idxContenidos = headers.findIndex(h => h.includes('contenido') || h.includes('debe') || h.includes('programa'));
         let idxDocente = headers.findIndex(h => h.includes('docente') || h.includes('profesor'));
         let idxObs = headers.findIndex(h => h.includes('obs') || h.includes('observacion'));
 
-        // Fallbacks por posición fija estándar si la coincidencia falla
+        // INTERCAMBIO CLAVE: Se mapea explícitamente "Contenidos" en el índice 4 y "Fecha" en el índice 6
+        let idxContenidos = 4;
+        let idxFecha = 6;
+
+        // Fallbacks para el resto si la búsqueda dinámica por palabra no encuentra encabezado
         if (idxAlumno === -1) idxAlumno = 0;
         if (idxEspacio === -1) idxEspacio = 1;
         if (idxAno === -1) idxAno = 2;
         if (idxCurso === -1) idxCurso = 3;
-        if (idxFecha === -1) idxFecha = 4;
         if (idxEstado === -1) idxEstado = 5;
-        if (idxContenidos === -1) idxContenidos = 6;
         if (idxDocente === -1) idxDocente = 7;
         if (idxObs === -1) idxObs = 8;
 
@@ -404,7 +403,7 @@
         localStorage.setItem('avance_continuo_db', JSON.stringify(data));
         updateDropdownOptions();
         render();
-        alert('¡Sincronización exitosa! Mapeo ordenado correctamente.');
+        alert('¡Sincronización exitosa! Los datos de Contenidos y Fecha de Acreditación han sido corregidos.');
       } catch (error) {
         alert('Error al conectar con Google Sheets.');
         console.error(error);
@@ -697,9 +696,9 @@
             espacio: row[1] || 'Sin Espacio',
             ano: row[2] || '-',
             curso: row[3] || '-',
-            fecha: row[4] || '-',
+            fecha: row[6] || '-',
             estado: estVal,
-            contenidos: row[6] || '-',
+            contenidos: row[4] || '-',
             docente: row[7] || 'Sin asignar',
             obs: row[8] || '-'
           };
