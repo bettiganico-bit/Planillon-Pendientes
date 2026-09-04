@@ -339,25 +339,31 @@
         
         const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
         if (lines.length < 2) return;
-        
+
         const headersRaw = parseCSVLine(lines[0]);
         const headers = headersRaw.map(cleanHeader);
 
-        // Búsqueda flexible de índice por palabra clave o fallback por posición
-        const findCol = (keywords, fallbackIdx) => {
-          const found = headers.findIndex(h => keywords.some(kw => h.includes(kw)));
-          return found !== -1 ? found : fallbackIdx;
-        };
+        // Mapeo dinámico mejorado por detección semántica previa
+        let idxAlumno = headers.findIndex(h => h.includes('alumno') || h.includes('estudiante') || h.includes('apellido'));
+        let idxEspacio = headers.findIndex(h => h.includes('espacio') || h.includes('materia') || h.includes('asignatura'));
+        let idxAno = headers.findIndex(h => h.includes('ano') || h.includes('anio') || h.includes('lectivo') || h.includes('cursada'));
+        let idxCurso = headers.findIndex(h => h.includes('curso') || h.includes('division') || h.includes('adeuda'));
+        let idxFecha = headers.findIndex(h => h.includes('fecha'));
+        let idxEstado = headers.findIndex(h => h.includes('estado') || h.includes('condicion'));
+        let idxContenidos = headers.findIndex(h => h.includes('contenido') || h.includes('debe') || h.includes('programa'));
+        let idxDocente = headers.findIndex(h => h.includes('docente') || h.includes('profesor'));
+        let idxObs = headers.findIndex(h => h.includes('obs') || h.includes('observacion'));
 
-        const idxAlumno = findCol(['apellido', 'alumno', 'estudiante', 'nombre'], 0);
-        const idxEspacio = findCol(['espacio', 'materia', 'asignatura'], 1);
-        const idxAno = findCol(['cursada', 'ano', 'anio', 'lectivo', 'cal'], 2);
-        const idxCurso = findCol(['curso', 'division', 'div', 'adeuda'], 3);
-        const idxEstado = findCol(['estado', 'acreditacion', 'condicion'], 4);
-        const idxFecha = findCol(['fecha'], 5);
-        const idxDocente = findCol(['docente', 'profesor', 'profe'], 6);
-        const idxContenidos = findCol(['contenido', 'debe', 'temas', 'programa'], 7);
-        const idxObs = findCol(['obs', 'observacion', 'nota', 'comentario'], 8);
+        // Fallbacks por posición fija estándar si la coincidencia falla
+        if (idxAlumno === -1) idxAlumno = 0;
+        if (idxEspacio === -1) idxEspacio = 1;
+        if (idxAno === -1) idxAno = 2;
+        if (idxCurso === -1) idxCurso = 3;
+        if (idxFecha === -1) idxFecha = 4;
+        if (idxEstado === -1) idxEstado = 5;
+        if (idxContenidos === -1) idxContenidos = 6;
+        if (idxDocente === -1) idxDocente = 7;
+        if (idxObs === -1) idxObs = 8;
 
         const parsedData = [];
 
@@ -365,23 +371,26 @@
           const values = parseCSVLine(lines[i]);
           if (values.length === 0) continue;
 
-          const alumnoVal = values[idxAlumno] || values[0];
-          const espacioVal = values[idxEspacio] || values[1];
-
-          if (!alumnoVal || cleanHeader(alumnoVal).includes('apellido')) {
+          const alumnoVal = values[idxAlumno];
+          if (!alumnoVal || cleanHeader(alumnoVal).includes('apellido') || cleanHeader(alumnoVal).includes('alumno')) {
             continue;
+          }
+
+          let estVal = (values[idxEstado] || '').toUpperCase().trim();
+          if (!['PENDIENTE', 'EN PROCESO', 'APROBADO'].includes(estVal)) {
+            estVal = 'PENDIENTE';
           }
 
           parsedData.push({
             id: i,
             alumno: alumnoVal || 'Sin Nombre',
-            espacio: espacioVal || 'Sin Espacio',
+            espacio: values[idxEspacio] || 'Sin Espacio',
             ano: values[idxAno] || '-',
             curso: values[idxCurso] || '-',
-            estado: (values[idxEstado] || 'PENDIENTE').toUpperCase(),
             fecha: values[idxFecha] || '-',
-            docente: values[idxDocente] || 'Sin asignar',
+            estado: estVal,
             contenidos: values[idxContenidos] || '-',
+            docente: values[idxDocente] || 'Sin asignar',
             obs: values[idxObs] || '-'
           });
         }
@@ -395,7 +404,7 @@
         localStorage.setItem('avance_continuo_db', JSON.stringify(data));
         updateDropdownOptions();
         render();
-        alert('¡Sincronización exitosa! Se cargaron ' + data.length + ' fichas perfectamente organizadas.');
+        alert('¡Sincronización exitosa! Mapeo ordenado correctamente.');
       } catch (error) {
         alert('Error al conectar con Google Sheets.');
         console.error(error);
@@ -676,35 +685,23 @@
 
         if (rawData.length < 2) return;
 
-        const headers = rawData[0].map(cleanHeader);
+        data = rawData.slice(1).filter(r => r.length > 0 && r[0]).map((row, idx) => {
+          let estVal = (row[5] || '').toString().toUpperCase().trim();
+          if (!['PENDIENTE', 'EN PROCESO', 'APROBADO'].includes(estVal)) {
+            estVal = 'PENDIENTE';
+          }
 
-        const findCol = (keywords, fallbackIdx) => {
-          const found = headers.findIndex(h => keywords.some(kw => h.includes(kw)));
-          return found !== -1 ? found : fallbackIdx;
-        };
-
-        const idxAlumno = findCol(['apellido', 'alumno', 'estudiante', 'nombre'], 0);
-        const idxEspacio = findCol(['espacio', 'materia', 'asignatura'], 1);
-        const idxAno = findCol(['cursada', 'ano', 'anio', 'lectivo', 'cal'], 2);
-        const idxCurso = findCol(['curso', 'division', 'div', 'adeuda'], 3);
-        const idxEstado = findCol(['estado', 'acreditacion', 'condicion'], 4);
-        const idxFecha = findCol(['fecha'], 5);
-        const idxDocente = findCol(['docente', 'profesor', 'profe'], 6);
-        const idxContenidos = findCol(['contenido', 'debe', 'temas', 'programa'], 7);
-        const idxObs = findCol(['obs', 'observacion', 'nota', 'comentario'], 8);
-
-        data = rawData.slice(1).filter(r => r.length > 0 && r[idxAlumno]).map((row, idx) => {
           return {
             id: idx + 1,
-            alumno: row[idxAlumno] || 'Sin Nombre',
-            espacio: row[idxEspacio] || 'Sin Espacio',
-            ano: row[idxAno] || '-',
-            curso: row[idxCurso] || '-',
-            estado: (row[idxEstado] || 'PENDIENTE').toString().toUpperCase(),
-            fecha: row[idxFecha] || '-',
-            docente: row[idxDocente] || 'Sin asignar',
-            contenidos: row[idxContenidos] || '-',
-            obs: row[idxObs] || '-'
+            alumno: row[0] || 'Sin Nombre',
+            espacio: row[1] || 'Sin Espacio',
+            ano: row[2] || '-',
+            curso: row[3] || '-',
+            fecha: row[4] || '-',
+            estado: estVal,
+            contenidos: row[6] || '-',
+            docente: row[7] || 'Sin asignar',
+            obs: row[8] || '-'
           };
         });
 
@@ -759,11 +756,6 @@
         closeModal();
       }
     }
-
-    render();
-  </script>
-</body>
-</html>
 
     render();
   </script>
